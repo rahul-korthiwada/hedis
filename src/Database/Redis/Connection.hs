@@ -249,3 +249,13 @@ refreshShardMap (Cluster.Connection nodeConns _ _ _ _) = do
     case slotsResponse of
         Left e -> throwIO $ ClusterConnectError e
         Right slots -> shardMapFromClusterSlotsResponse slots
+
+-- |Constructs a 'Connection' pool to a Redis server designated by the
+--  given 'ConnectInfo', then tests if the server is actually there.
+--  Throws an exception if the connection to the Redis server can't be
+--  established.
+checkedConnectCluster :: ConnectInfo -> IO Connection
+checkedConnectCluster connInfo = do
+    conn <- connectCluster connInfo
+    runRedis conn $ void ping
+    return conn
